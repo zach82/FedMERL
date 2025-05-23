@@ -1,8 +1,3 @@
-# -*- coding: utf-8 -*-
-# @Time    : 2021/10/25 14:46
-# @Author  : Weiming Mai
-# @FileName: Network.py
-# @Software: PyCharm
 import torch.nn.functional as F
 import torch
 from torch import nn
