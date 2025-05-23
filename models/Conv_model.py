@@ -1,9 +1,3 @@
-# -*- coding: utf-8 -*-
-# @Time    : 2022/5/4 19:45
-# @Author  : Weiming Mai
-# @FileName: Conv_model.py
-# @Software: PyCharm
-
 import torch
 from torch import nn
 import torch.nn.functional as F
