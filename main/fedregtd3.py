@@ -289,26 +289,26 @@ class fedTD3():
         experience_vector_params = list(self.experience_vector.parameters())
         # ensure consistency in the number of both
         assert len(experience_vector_params) == len(perturbation_grads), "Mismatch in parameter dimensions!"
-        # 计算内积
+        # compute the inner product
         first_inner_product = sum(torch.sum(p1 * p2) for p1, p2 in zip(experience_vector_params, perturbation_grads))
         v = 0.01
         second = v/2 * l2_norm(self.critic.Q_net, self.experience_vector)
-        # 计算 R_Loss
+        # get R_Loss
         R_Loss = -first_inner_product + second
-        # 确保梯度清零，以避免累积
+        # Ensure that gradients are cleared to prevent accumulation.
         self.critic.critic_optimizer.zero_grad()
         self.experience_vector.zero_grad()  # If the experience vector has a separate optimizer, it also needs to be reset to zero.
-        # 计算 R_Loss 的梯度
+        # compute the gradient of $R_{Loss}$
         R_Loss.backward()
-        # 提取梯度到一个列表
+        # extract gradients into a list
         R_Loss_gradients_list = []
-        # Critic Q_net 的梯度
+        # Critic Q_net's gradients
         for param in self.critic.Q_net.parameters():
             if param.grad is not None:
                 R_Loss_gradients_list.append(param.grad.clone())
         #  ###################################################################################
         lamba = 0.005
-        # 计算相关性扰动
+        # compute correlation perturbation
         epsilon_i = [lamba * p / p.norm(2) for p in perturbation_grads]
         with torch.no_grad():
             for param, epsilon in zip(self.temp_critic.Q_net.parameters(), epsilon_i):
