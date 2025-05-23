@@ -97,8 +97,8 @@ class Arguments():
             self.playing_step = int(10e4)  #2e4
             self.capacity = 10000
             self.noisy_input = False
-            self.N = int(100)     # N步联邦一次critic网络
-            self.M = 2  # M步更新一次actor网络和target网络
+            self.N = int(100)     # perform federated aggregation of the critic network every N steps
+            self.M = 2  # perform an update of the actor and target networks every M steps
             self.L = int(100)
             self.policy_noise = 0.2  # std of the noise, when update critics
             self.std_noise = 0.1  # std of the noise, when explore 0.1
@@ -288,7 +288,7 @@ def ClientUpdate(client_pipe, agent, local_env, args):
             agent.memory.add(state, action, clip_reward, n_state, done)
         else:
             agent.memory.add(state, action, reward, n_state, done)
-        state_batch = agent.META_UpdateQ() ##### 更新模型参数 META_UpdateQ
+        state_batch = agent.META_UpdateQ() ##### update model parameters (META_UpdateQ)
         # agent.UpdateQ(client_pipe)
         if (i_ep+1) % args.N == 0:  #update Q
             # q = agent.critic.Q_net
@@ -330,12 +330,12 @@ def ClientUpdate(client_pipe, agent, local_env, args):
 def Agg(local_models, global_net, weighted, args):
     with torch.no_grad():
         K = args.client_num
-        device = next(iter(global_net.values())).device  # 获取 global_net 当前的设备
+        device = next(iter(global_net.values())).device  # get the current device of global_net
         for params in global_net.keys():
-            global_net[params].copy_(weighted[0] * local_models[0][params].to(device))  # 确保 local_models 在同一设备上
+            global_net[params].copy_(weighted[0] * local_models[0][params].to(device))  # ensure that local_models are on the same device
         for params in global_net.keys():
             for k in range(1, K):
-                global_net[params] += (weighted[k] * local_models[k][params].to(device))  # 确保 local_models 在同一设备上
+                global_net[params] += (weighted[k] * local_models[k][params].to(device))  # ensure that local_models are on the same device
 
 class Server():
     def __init__(self,state_dim, action_dim, args):
@@ -365,7 +365,7 @@ def ServerUpdate(pipe_dict, server, weighted, actor, envs, args): #FedAvg
         pipe_dict[i][1].send((server.q.state_dict(), server.mu.state_dict(), server.experience_vector.state_dict()))   #init model
 
     scale_factor = 1.0
-    scale_step = (parser_args.multiple-scale_factor) / (args.Round if args.Round > 0 else 1)  # 每一轮递增的步长
+    scale_step = (parser_args.multiple-scale_factor) / (args.Round if args.Round > 0 else 1)  # the step size that is incremented each round
 
     for round_ in range(args.Round):
         for i in range(args.client_num):
