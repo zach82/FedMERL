@@ -189,7 +189,7 @@ class fedTD3():
         self.l_mse = nn.MSELoss()
         self.critics_loss = nn.MSELoss()
 
-        # 经验向量
+        # Experience Vector Module
         self.experience_vector = mlp_value(state_dim, action_dim)
 
     def UpdateQ(self):
@@ -261,7 +261,7 @@ class fedTD3():
     def META_UpdateQ(self):
         if len(self.memory) < self.batch_size:
             return
-        ############################################# 采集训练数据 #########################################################
+        ############################################# data collection for training #########################################################
         # List to store processed batches
         batches = []
 
@@ -276,7 +276,7 @@ class fedTD3():
         state_batch_3, action_batch_3, reward_batch_3, n_state_batch_3, done_batch_3 = batches[2]
 
         self.temp_q.load_state_dict(self.critic.Q_net.state_dict())
-        # #########################################元学习sharp-MAML模块#####################################################################
+        # #########################################Sharp-MAML-based meta-learning module#####################################################################
         self.temp_critic = copy.deepcopy(self.critic)
         tem_critic_loss = self.TD3_compute_1st_grad(state_batch_1, action_batch_1, reward_batch_1, n_state_batch_1,
                                                     done_batch_1)
@@ -285,9 +285,9 @@ class fedTD3():
 
         perturbation_grads = [p.grad.clone() for p in self.temp_critic.Q_net.parameters()]
 
-        #  ######################################经验向量模块##################################
+        #  ######################################Experience Vector Module##################################
         experience_vector_params = list(self.experience_vector.parameters())
-        # 确保两者的数量一致
+        # ensure consistency in the number of both
         assert len(experience_vector_params) == len(perturbation_grads), "Mismatch in parameter dimensions!"
         # 计算内积
         first_inner_product = sum(torch.sum(p1 * p2) for p1, p2 in zip(experience_vector_params, perturbation_grads))
@@ -297,7 +297,7 @@ class fedTD3():
         R_Loss = -first_inner_product + second
         # 确保梯度清零，以避免累积
         self.critic.critic_optimizer.zero_grad()
-        self.experience_vector.zero_grad()  # 如果 experience_vector 有独立优化器，也需要清零
+        self.experience_vector.zero_grad()  # If the experience vector has a separate optimizer, it also needs to be reset to zero.
         # 计算 R_Loss 的梯度
         R_Loss.backward()
         # 提取梯度到一个列表
@@ -322,7 +322,7 @@ class fedTD3():
         #     for param, epsilon in zip(self.temp_critic.Q_net.parameters(), epsilon_i):
         #         param -= epsilon
 
-        # ########################################## 海塞矩阵逼近二阶导数 #################################################
+        # ########################################## Approximating the second-order derivative with the Hessian matrix #################################################
         self.temp_critic.critic_optimizer.zero_grad()
         tem_critic_loss = self.TD3_compute_1st_grad(state_batch_2, action_batch_2, reward_batch_2, n_state_batch_2,
                                                     done_batch_2)
@@ -340,7 +340,7 @@ class fedTD3():
         # self.TD3_compute_1st_grad_critic(state_batch_3, action_batch_3, reward_batch_3, n_state_batch_3, done_batch_3)
         self.prev_q.load_state_dict(self.temp_q.state_dict())
 
-        #########################################更新经验向量##########################################################
+        #########################################update the experience vector##########################################################
         last_grad_dict = copy.deepcopy(self.experience_vector.state_dict())
         for key, value in zip(self.experience_vector.state_dict().keys(), grads_1st):
             last_grad_dict[key] = -1 / v * value
