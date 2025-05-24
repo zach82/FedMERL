@@ -1,8 +1,3 @@
-# -*- coding: utf-8 -*-
-# @Time    : 2021/12/4 19:42
-# @Author  : Weiming Mai
-# @FileName: walker.py
-# @Software: PyCharm
 import sys
 import math
 
