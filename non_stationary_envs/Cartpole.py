@@ -1,10 +1,3 @@
-# -*- coding: utf-8 -*-
-# @Time    : 2021/11/17 18:53
-# @Author  : Weiming Mai
-# @FileName: Cartpole.py
-# @Software: PyCharm
-
-
 import math
 import gym
 from gym import spaces, logger
