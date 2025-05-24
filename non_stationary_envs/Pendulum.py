@@ -1,9 +1,3 @@
-# -*- coding: utf-8 -*-
-# @Time    : 2021/11/22 22:02
-# @Author  : Weiming Mai
-# @FileName: Pendulum.py
-# @Software: PyCharm
-
 from os import path
 import math
 import gym
