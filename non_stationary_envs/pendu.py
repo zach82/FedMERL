@@ -1,11 +1,3 @@
-# -*- coding: utf-8 -*-
-# @Time    : 2021/12/27 19:33
-# @Author  : Weiming Mai
-# @FileName: pendu.py
-# @Software: PyCharm
-
-
-
 # from fed_reg.center_td3 import Actor
 # from fed_reg.fedregtd3 import Actor
 from agents.TD3 import Actor
