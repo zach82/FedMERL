@@ -1,9 +1,3 @@
-# -*- coding: utf-8 -*-
-# @Time    : 2021/11/1 21:53
-# @Author  : Weiming Mai
-# @FileName: Tools.py
-# @Software: PyCharm
-
 import torch
 import random
 import math
