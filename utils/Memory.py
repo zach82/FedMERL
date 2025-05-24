@@ -1,8 +1,3 @@
-# -*- coding: utf-8 -*-
-# @Time    : 2021/10/25 14:46
-# @Author  : Weiming Mai
-# @FileName: Memory.py
-# @Software: PyCharm
 import random
 from collections import deque
 from torch.utils.data import Dataset
